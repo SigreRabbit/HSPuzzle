@@ -1,36 +1,98 @@
 <html>
-  <head>
-  </head>
 
-  <body>
+<head>
+</head>
+
+<body>
     <script>
-      let url = 'https://api.hearthstonejson.com/v1/latest/jaJP/cards.collectible.json';
-      fetch(url)
-          .then(response => response.json())
-          .then(data => {
-            console.log(data);
-            document.write(data);
-          });
-      
-//       ・ランダムに取り出す
-//       ・数枚並べる
-//       ・2枚選択できるようにする
-//       ・トレード
-//       
-//       ・倒したら消してポイント
-//       
-//       ・自分だけ倒れる、相手だけ倒れる、両方倒れる
-      
-//       ○　レアリティ下でレアリティ上を倒す
-//       　　同レアリティなら有利トレードは死んだ方がポイント、同士討ちは０
-      
-//       △　コスト下で上を倒す
-      
-      
-      
-//       const jsonData = 
-//       let objData = JSON.parse(jsonData);
-//       document.write("<p>JavaScript テスト</p>");
+        function main(cards) {
+
+            for (let i = 0; i < 8; i++) {
+
+                let rand = Math.floor(Math.random() * cards.length)
+                let card = cards[rand]
+
+                while (card.type != "MINION") {
+                    rand = Math.floor(Math.random() * cards.length)
+                    card = cards[rand]
+                }
+
+
+                console.log(card.name + " (" + card.cost + ") " + card.attack + "/" + card.health)
+                // if (card.text && card.text.match(/\[x\]<b>挑発<\/b>/)) {
+                // if () {
+                if (card.text && card.text.match(/\[x\]<b>挑発<\/b>/)) {
+                    console.log("挑発")
+                }
+                // }
+                // if (card.text && card.text.match(/挑発/)) {
+                //     console.log()
+                // }
+
+            }
+        }
+        //         artist: "Dave Allsop"
+        // cardClass: "WARLOCK"
+        // collectible: true
+        // cost: 8
+        // dbfId: 859
+        // flavor: "捻じれし冥界は定まった形のない世界で、魔力と、幻影と、破壊されたミニオンであふれてるそうだ。"
+        // id: "EX1_312"
+        // name: "捻じれし冥界"
+        // rarity: "EPIC"
+        // set: "EXPERT1"
+        // spellSchool: "SHADOW"
+        // text: "[x]全てのミニオンを\n破壊する。"
+        // type: "SPELL"type: "MINION"
+        const url = 'https://api.hearthstonejson.com/v1/latest/jaJP/cards.collectible.json'
+        fetch(url)
+            .then(response => response.json())
+            .then(cards => main(cards))
+
+        //       ・ランダムに取り出す
+        //       ・数枚並べる
+        //       ・2枚選択できるようにする
+        //       ・トレード
+        //
+        //       ・倒したら消してポイント
+        //
+        //初期HP30
+        //8枚出して、任意の1枚で、1枚を攻撃させる
+        //その結果破壊されたミニオンのコスト分得点
+
+        //残りが1枚になったら、その攻撃力分自分にダメージ
+        //0枚になったら、ボーナス？
+        //攻撃0のみになったら、
+        //それらの後、リセット
+
+        //倒し方ボーナス
+        //一致系は、同時に死んだときだけにするか、片方のみでもいいか
+        //同時の方がゲーム性ある？
+
+        //cardClassが一致(中立以外) : 2倍とか
+        //武勲(攻撃側の攻撃が防御側の体力とちょうど同じ) : 1.5倍とかちょっと
+        //血祭
+        //レジェンド
+        //artistが一致 : すごい アーティスト名も出そう
+        //挑発がいたら、挑発以外から挑発にしか攻撃できない
+        //突撃/急襲がいたらそれのみ攻撃できる？
+        //猛毒
+        //生命奪取？
+
+
+        //       ・自分だけ倒れる、相手だけ倒れる、両方倒れる
+
+        //       ○　レアリティ下でレアリティ上を倒す
+        //       　　同レアリティなら有利トレードは死んだ方がポイント、同士討ちは０
+
+        //       △　コスト下で上を倒す
+
+
+
+        //       const jsonData =
+        //       let objData = JSON.parse(jsonData);
+        //       document.write("<p>JavaScript テスト</p>");
     </script>
-  </body>
+</body>
+
 </html>
