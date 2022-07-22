@@ -28,9 +28,16 @@
             background: #cbe8fa;
             cursor: pointer;
         }
+
+        .dead .name {
+            text-decoration: line-through
+        }
     </style>
+
     <script>
         var round = 1
+        var timerId
+        var heroHealth = 30
 
         function reset() {
             $("#loading").css("display", "block")
@@ -63,12 +70,19 @@
                 $("#next").prop("disabled", true)
                 $("#loading").css("display", "none")
                 $(".main").css("display", "block")
+                $(".card").removeClass("dead")
+                $(".card").addClass("alive")
+                $(".select").prop("disabled", false)
 
-                setTimeout(function () {
-                    $("#round").text("タイムオーバー！")
+                timerId = setTimeout(function () {
+                    $(".select").prop("disabled", true)
+                    $(".alive .attack").each(function () {
+                        heroHealth -= $(this).text()
+                    })
+                    $("#round").text("タイムオーバー！ダメージを受けた！")
+                    $("#heroHealth").text(heroHealth)
                     $("#next").text("次のラウンド")
                     $("#next").prop("disabled", false)
-                    $(".select").prop("disabled", true)
                     round++
                 }, round < 7 ? (7 - round) * 5000 : 5000)
             }
@@ -91,6 +105,7 @@
                     $(".to").text("to")
                     break
                 case "to":
+                    //攻撃処理
                     const fromIndex = $(".select").index($(".from"))
                     const toIndex = index
 
@@ -103,7 +118,8 @@
                     if (fromHealthRes <= 0) {
                         fromHealthRes = 0
                         $(".select").eq(fromIndex).prop("disabled", true)
-                        $(".name").eq(fromIndex).css("text-decoration", "line-through")
+                        $(".card").eq(fromIndex).removeClass("alive")
+                        $(".card").eq(fromIndex).addClass("dead")
                     }
                     $(".health").eq(fromIndex).text(fromHealthRes)
 
@@ -111,13 +127,43 @@
                     if (toHealthRes <= 0) {
                         toHealthRes = 0
                         $(".select").eq(toIndex).prop("disabled", true)
-                        $(".name").eq(toIndex).css("text-decoration", "line-through")
+                        $(".card").eq(toIndex).removeClass("alive")
+                        $(".card").eq(toIndex).addClass("dead")
                     }
                     $(".health").eq(toIndex).text(toHealthRes)
 
+                    //クラスとボタンテキスト初期化
                     $(".from").removeClass("from")
                     $(".to").removeClass("to")
                     $(".select").text("from")
+
+                    //終了判定
+                    if ($(".dead").length == 8) {
+                        clearTimeout(timerId)
+                        $(".select").prop("disabled", true)
+                        //クリア
+
+                        $("#round").text("クリア！")
+                        $("#next").text("次のラウンド")
+                        $("#next").prop("disabled", false)
+
+                        round++
+                    }
+                    else if ($(".dead").length == 7) {
+                        //ダメージ
+                        clearTimeout(timerId)
+                        $(".select").prop("disabled", true)
+
+                        heroHealth -= $(".alive .attack").text()
+                        $("#heroHealth").text(heroHealth)
+                        $("#round").text("ダメージを受けた！")
+                        $("#next").text("次のラウンド")
+                        $("#next").prop("disabled", false)
+
+                        round++
+                    }
+
+
                     break
                 case "cancel":
                     $(".from").removeClass("from")
@@ -177,59 +223,63 @@
     <button id="next" onclick="reset()">ゲームスタート！</button>
     <span id="round"></span>
     <br>
+    ヒーローの体力: <span id="heroHealth">30</span>
+    <br>
+
     <div id="loading">loading...</div>
     <br>
+
     <div class="main">
-        <div>
+        <div class="card alive">
             <button class="select" onclick="selectCard(0)">from</button>
             <span class="name"></span>
             (<span class="cost"></span>)
             <span class="attack"></span>
             <span class="health"></span>
         </div>
-        <div>
+        <div class="card alive">
             <button class="select" onclick="selectCard(1)">from</button>
             <span class="name"></span>
             (<span class="cost"></span>)
             <span class="attack"></span>
             <span class="health"></span>
         </div>
-        <div>
+        <div class="card alive">
             <button class="select" onclick="selectCard(2)">from</button>
             <span class="name"></span>
             (<span class="cost"></span>)
             <span class="attack"></span>
             <span class="health"></span>
         </div>
-        <div>
+        <div class="card alive">
             <button class="select" onclick="selectCard(3);">from</button>
             <span class="name"></span>
             (<span class="cost"></span>)
             <span class="attack"></span>
             <span class="health"></span>
         </div>
-        <div>
+        <div class="card alive">
             <button class="select" onclick="selectCard(4);">from</button>
             <span class="name"></span>
             (<span class="cost"></span>)
             <span class="attack"></span>
             <span class="health"></span>
         </div>
-        <div>
+        <div class="card alive">
             <button class="select" onclick="selectCard(5);">from</button>
             <span class="name"></span>
             (<span class="cost"></span>)
             <span class="attack"></span>
             <span class="health"></span>
         </div>
-        <div>
+        <div class="card alive">
             <button class="select" onclick="selectCard(6);">from</button>
             <span class="name"></span>
             (<span class="cost"></span>)
             <span class="attack"></span>
             <span class="health"></span>
         </div>
-        <div>
+        <div class="card alive">
             <button class="select" onclick="selectCard(7);">from</button>
             <span class="name"></span>
             (<span class="cost"></span>)
