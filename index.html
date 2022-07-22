@@ -1,53 +1,131 @@
 <html>
 
 <head>
-</head>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        #loading {
+            display: none;
+        }
 
-<body>
+        .main {
+            display: none;
+        }
+
+        #next {
+            width: 130px;
+            padding: 10px;
+            box-sizing: border-box;
+            border: 1px solid #68779a;
+            background: #cbe8fa;
+            cursor: pointer;
+        }
+
+        .select {
+            width: 50px;
+            padding: 5px;
+            box-sizing: border-box;
+            border: 1px solid #68779a;
+            background: #cbe8fa;
+            cursor: pointer;
+        }
+    </style>
     <script>
-        function main(cards) {
+        var round = 1
 
-            for (let i = 0; i < 8; i++) {
+        function reset() {
+            $("#loading").css("display", "block")
+            $(".main").css("display", "none")
 
-                let rand = Math.floor(Math.random() * cards.length)
-                let card = cards[rand]
+            const url = 'https://api.hearthstonejson.com/v1/latest/jaJP/cards.collectible.json'
 
-                while (card.type != "MINION") {
-                    rand = Math.floor(Math.random() * cards.length)
-                    card = cards[rand]
+            function main(json) {
+                const cards = json
+
+                for (let i = 0; i < 8; i++) {
+                    let rand
+                    let card
+                    do {
+                        rand = Math.floor(Math.random() * cards.length)
+                        card = cards[rand]
+                    } while (card.type != "MINION")
+
+                    $(".name").eq(i).text(card.name)
+                    $(".cost").eq(i).text(card.cost)
+                    $(".attack").eq(i).text(card.attack)
+                    $(".health").eq(i).text(card.health)
+
+                    if (card.text && card.text.match(/\[x\]<b>挑発<\/b>/)) {
+                        $(".select").eq(i).addClass("taunt")
+                    }
                 }
 
+                $("#round").text("Round " + round)
+                $("#next").prop("disabled", true)
+                $("#loading").css("display", "none")
+                $(".main").css("display", "block")
 
-                console.log(card.name + " (" + card.cost + ") " + card.attack + "/" + card.health)
-                // if (card.text && card.text.match(/\[x\]<b>挑発<\/b>/)) {
-                // if () {
-                if (card.text && card.text.match(/\[x\]<b>挑発<\/b>/)) {
-                    console.log("挑発")
-                }
-                // }
-                // if (card.text && card.text.match(/挑発/)) {
-                //     console.log()
-                // }
+                setTimeout(function () {
+                    $("#round").text("タイムオーバー！")
+                    $("#next").text("次のラウンド")
+                    $("#next").prop("disabled", false)
+                    $(".select").prop("disabled", true)
+                    round++
+                }, round < 7 ? (7 - round) * 500 : 500)
+            }
 
+            fetch(url)
+                .then(response => response.json())
+                .then(json => main(json))
+        }
+        // reset()
+
+        function selectCard(index) {
+            const state = $(".select").eq(index).text()
+
+            switch (state) {
+                case "from":
+                    $(".select").addClass("to")
+                    $(".select").eq(index).removeClass("to")
+                    $(".select").eq(index).addClass("from")
+                    $(".from").text("cancel")
+                    $(".to").text("to")
+                    break
+                case "to":
+                    const fromIndex = $(".select").index($(".from"))
+                    const toIndex = index
+
+                    const fromAttack = $(".attack").eq(fromIndex).text()
+                    const fromHealth = $(".health").eq(fromIndex).text()
+                    const toAttack = $(".attack").eq(toIndex).text()
+                    const toHealth = $(".health").eq(toIndex).text()
+
+                    let fromHealthRes = fromHealth - toAttack
+                    if (fromHealthRes <= 0) {
+                        fromHealthRes = 0
+                        $(".select").eq(fromIndex).prop("disabled", true)
+                        $(".name").eq(fromIndex).css("text-decoration", "line-through")
+                    }
+                    $(".health").eq(fromIndex).text(fromHealthRes)
+
+                    let toHealthRes = toHealth - fromAttack
+                    if (toHealthRes <= 0) {
+                        toHealthRes = 0
+                        $(".select").eq(toIndex).prop("disabled", true)
+                        $(".name").eq(toIndex).css("text-decoration", "line-through")
+                    }
+                    $(".health").eq(toIndex).text(toHealthRes)
+
+                    $(".from").removeClass("from")
+                    $(".to").removeClass("to")
+                    $(".select").text("from")
+                    break
+                case "cancel":
+                    $(".from").removeClass("from")
+                    $(".to").removeClass("to")
+                    $(".select").text("from")
+                    break
             }
         }
-        //         artist: "Dave Allsop"
-        // cardClass: "WARLOCK"
-        // collectible: true
-        // cost: 8
-        // dbfId: 859
-        // flavor: "捻じれし冥界は定まった形のない世界で、魔力と、幻影と、破壊されたミニオンであふれてるそうだ。"
-        // id: "EX1_312"
-        // name: "捻じれし冥界"
-        // rarity: "EPIC"
-        // set: "EXPERT1"
-        // spellSchool: "SHADOW"
-        // text: "[x]全てのミニオンを\n破壊する。"
-        // type: "SPELL"type: "MINION"
-        const url = 'https://api.hearthstonejson.com/v1/latest/jaJP/cards.collectible.json'
-        fetch(url)
-            .then(response => response.json())
-            .then(cards => main(cards))
 
         //       ・ランダムに取り出す
         //       ・数枚並べる
@@ -77,7 +155,7 @@
         //挑発がいたら、挑発以外から挑発にしか攻撃できない
         //突撃/急襲がいたらそれのみ攻撃できる？
         //猛毒
-        //生命奪取？
+        //生命奪取もいていいなこれ
 
 
         //       ・自分だけ倒れる、相手だけ倒れる、両方倒れる
@@ -93,6 +171,73 @@
         //       let objData = JSON.parse(jsonData);
         //       document.write("<p>JavaScript テスト</p>");
     </script>
+</head>
+
+<body>
+    <button id="next" onclick="reset()">ゲームスタート！</button>
+    <span id="round"></span>
+    <br>
+    <div id="loading">loading...</div>
+    <br>
+    <div class="main">
+        <div>
+            <button class="select" onclick="selectCard(0)">from</button>
+            <span class="name"></span>
+            (<span class="cost"></span>)
+            <span class="attack"></span>
+            <span class="health"></span>
+        </div>
+        <div>
+            <button class="select" onclick="selectCard(1)">from</button>
+            <span class="name"></span>
+            (<span class="cost"></span>)
+            <span class="attack"></span>
+            <span class="health"></span>
+        </div>
+        <div>
+            <button class="select" onclick="selectCard(2)">from</button>
+            <span class="name"></span>
+            (<span class="cost"></span>)
+            <span class="attack"></span>
+            <span class="health"></span>
+        </div>
+        <div>
+            <button class="select" onclick="selectCard(3);">from</button>
+            <span class="name"></span>
+            (<span class="cost"></span>)
+            <span class="attack"></span>
+            <span class="health"></span>
+        </div>
+        <div>
+            <button class="select" onclick="selectCard(4);">from</button>
+            <span class="name"></span>
+            (<span class="cost"></span>)
+            <span class="attack"></span>
+            <span class="health"></span>
+        </div>
+        <div>
+            <button class="select" onclick="selectCard(5);">from</button>
+            <span class="name"></span>
+            (<span class="cost"></span>)
+            <span class="attack"></span>
+            <span class="health"></span>
+        </div>
+        <div>
+            <button class="select" onclick="selectCard(6);">from</button>
+            <span class="name"></span>
+            (<span class="cost"></span>)
+            <span class="attack"></span>
+            <span class="health"></span>
+        </div>
+        <div>
+            <button class="select" onclick="selectCard(7);">from</button>
+            <span class="name"></span>
+            (<span class="cost"></span>)
+            <span class="attack"></span>
+            <span class="health"></span>
+        </div>
+    </div>
+
 </body>
 
 </html>
