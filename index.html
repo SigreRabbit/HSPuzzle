@@ -20,6 +20,10 @@
             cursor: pointer;
         }
 
+        .card {
+            margin: 10px;
+        }
+
         .select {
             width: 50px;
             padding: 5px;
@@ -74,7 +78,27 @@
                 $(".card").addClass("alive")
                 $(".select").prop("disabled", false)
 
+                //根本的なイメージとして、関数は実行時に上から下に全て処理されて、途中で止まることはない
+                //setTimeoutはいわばスレッド的に動く
+
+                for (let t = 0; t < $("#timeP").prop("max"); t++) {
+                    const a = $("#timeP").val();
+                    //timerIdを配列にして、
+                    //中断(クリア)時の関数でループで
+                    // console.log($("#timeP").prop("max"))
+
+                    // (function (t) {
+                    timerId = setTimeout(function () {
+                        $("#timeP").val($("#timeP").val() - 1)
+                        console.log(t)
+                    }, t * 1000)
+                    // })(t) //いるのかと思ったけどforのtがletならいらんっぽいな
+                }
                 timerId = setTimeout(function () {
+                    //クリア用の関数つくｒ
+                    //#roundのテキストは関数呼ぶ前に外で
+                    //体力減らして、普通ならボ次のラウンドボたん出して、
+                    //0以下ならゲームオバーでうわがき、シェアボタン出しで、#nextはゲーム開始にする
                     $(".select").prop("disabled", true)
                     $(".alive .attack").each(function () {
                         heroHealth -= $(this).text()
@@ -84,7 +108,8 @@
                     $("#next").text("次のラウンド")
                     $("#next").prop("disabled", false)
                     round++
-                }, round < 7 ? (7 - round) * 5000 : 5000)
+                    // }, round < 7 ? (7 - round) * 5000 : 5000)
+                }, 30000 - 1000)
             }
 
             fetch(url)
@@ -137,11 +162,15 @@
                     $(".to").removeClass("to")
                     $(".select").text("from")
 
+                    //ぜんぶ0かどうｋの処理
+                    //ならおわる
+
                     //終了判定
                     if ($(".dead").length == 8) {
                         clearTimeout(timerId)
                         $(".select").prop("disabled", true)
                         //クリア
+                        //オールクリアボーナス的な
 
                         $("#round").text("クリア！")
                         $("#next").text("次のラウンド")
@@ -217,6 +246,15 @@
         //       let objData = JSON.parse(jsonData);
         //       document.write("<p>JavaScript テスト</p>");
     </script>
+
+    <style>
+        #container {
+            margin: 20px;
+            width: 400px;
+            height: 8px;
+            position: relative;
+        }
+    </style>
 </head>
 
 <body>
@@ -224,11 +262,8 @@
     <span id="round"></span>
     <br>
     ヒーローの体力: <span id="heroHealth">30</span>
-    <br>
-
+    <div>残り時間: <span id="timeT">30</span> <progress id="timeP" max="30" value="30"></progress></div>
     <div id="loading">loading...</div>
-    <br>
-
     <div class="main">
         <div class="card alive">
             <button class="select" onclick="selectCard(0)">from</button>
@@ -287,6 +322,15 @@
             <span class="health"></span>
         </div>
     </div>
+
+    <br>
+    <!-- <div style="transform:rotate(-90deg)"> -->
+    <svg viewBox="0 0 50 50" height="100%" width="100%" style="overflow: visible; transform:rotate(-90deg);">
+        <circle cx="50%" cy="50%" fill="none" stroke-width="1" r="5" stroke="#E6ECF0" />
+        <circle cx="50%" cy="50%" fill="none" stroke-width="1" r="5" stroke="#1DA1F2" stroke-linecap="round" style="stroke-dashoffset: 10; stroke-dasharray: 30;" />
+        <!-- 最大値はr*pi*2っぽい -->
+    </svg>
+    <!-- </div> -->
 
 </body>
 
