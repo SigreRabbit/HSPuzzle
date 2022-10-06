@@ -40,7 +40,7 @@
 
     <script>
         var round = 1
-        var timerId
+        var timerIdArray = []
         var heroHealth = 30
 
         function reset() {
@@ -81,19 +81,19 @@
                 //根本的なイメージとして、関数は実行時に上から下に全て処理されて、途中で止まることはない
                 //setTimeoutはいわばスレッド的に動く
 
-                for (let t = 0; t < $("#timeP").prop("max"); t++) {
-                    const a = $("#timeP").val();
-                    //timerIdを配列にして、
-                    //中断(クリア)時の関数でループで
-                    // console.log($("#timeP").prop("max"))
-
-                    // (function (t) {
+                //カウントダウン
+                const timeMax = $("#timeP").prop("max")
+                //ゲージ初期化
+                $("#timeP").val(timeMax)
+                //1～28秒まで
+                for (let t = 0; t < timeMax; t++) {
                     timerId = setTimeout(function () {
                         $("#timeP").val($("#timeP").val() - 1)
-                        console.log(t)
+                        $("#timeT").text(timeMax - t - 1)
                     }, t * 1000)
-                    // })(t) //いるのかと思ったけどforのtがletならいらんっぽいな
+                    timerIdArray.push(timerId)
                 }
+                //制限時間(29秒)
                 timerId = setTimeout(function () {
                     //クリア用の関数つくｒ
                     //#roundのテキストは関数呼ぶ前に外で
@@ -110,13 +110,23 @@
                     round++
                     // }, round < 7 ? (7 - round) * 5000 : 5000)
                 }, 30000 - 1000)
+                timerIdArray.push(timerId)
             }
+
+            console.log(timerIdArray)
 
             fetch(url)
                 .then(response => response.json())
                 .then(json => main(json))
         }
         // reset()
+
+        function clearAllTimeout() {
+            for (let i = 0; i < timerIdArray.length; i++) {
+                clearTimeout(timerIdArray[i])
+                delete timerIdArray[i]
+            }
+        }
 
         function selectCard(index) {
             const state = $(".select").eq(index).text()
@@ -167,7 +177,8 @@
 
                     //終了判定
                     if ($(".dead").length == 8) {
-                        clearTimeout(timerId)
+                        //clearTimeout(timerId)
+                        clearAllTimeout()
                         $(".select").prop("disabled", true)
                         //クリア
                         //オールクリアボーナス的な
@@ -180,7 +191,8 @@
                     }
                     else if ($(".dead").length == 7) {
                         //ダメージ
-                        clearTimeout(timerId)
+                        //clearTimeout(timerId)
+                        clearAllTimeout()
                         $(".select").prop("disabled", true)
 
                         heroHealth -= $(".alive .attack").text()
@@ -246,7 +258,7 @@
         //       let objData = JSON.parse(jsonData);
         //       document.write("<p>JavaScript テスト</p>");
     </script>
-
+    <!-- 
     <style>
         #container {
             margin: 20px;
@@ -254,7 +266,7 @@
             height: 8px;
             position: relative;
         }
-    </style>
+    </style> -->
 </head>
 
 <body>
@@ -323,13 +335,13 @@
         </div>
     </div>
 
-    <br>
+    <!-- <br> -->
     <!-- <div style="transform:rotate(-90deg)"> -->
-    <svg viewBox="0 0 50 50" height="100%" width="100%" style="overflow: visible; transform:rotate(-90deg);">
+    <!-- <svg viewBox="0 0 50 50" height="100%" width="100%" style="overflow: visible; transform:rotate(-90deg);">
         <circle cx="50%" cy="50%" fill="none" stroke-width="1" r="5" stroke="#E6ECF0" />
         <circle cx="50%" cy="50%" fill="none" stroke-width="1" r="5" stroke="#1DA1F2" stroke-linecap="round" style="stroke-dashoffset: 10; stroke-dasharray: 30;" />
-        <!-- 最大値はr*pi*2っぽい -->
-    </svg>
+        最大値はr*pi*2っぽい
+    </svg> -->
     <!-- </div> -->
 
 </body>
